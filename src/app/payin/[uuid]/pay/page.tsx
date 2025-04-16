@@ -1,15 +1,22 @@
-
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
 import { useGetQuote } from '@/hooks/useGetQuote';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function PayQuotePage() {
   const { uuid } = useParams() as { uuid: string };
   const router = useRouter();
+
   const { data: quote, isLoading, isError } = useGetQuote(uuid);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
@@ -19,6 +26,7 @@ export default function PayQuotePage() {
     const expiry = quote.expiryDate;
     const timer = setInterval(() => {
       const diff = expiry - Date.now();
+
       if (diff <= 0) {
         router.push(`/payin/${uuid}/expired`);
       } else {
@@ -29,10 +37,6 @@ export default function PayQuotePage() {
     return () => clearInterval(timer);
   }, [quote?.expiryDate, router, uuid]);
 
-  const copyToClipboard = (value: string) => {
-    navigator.clipboard.writeText(value);
-  };
-
   const formatTime = (ms: number) => {
     const total = Math.floor(ms / 1000);
     const min = Math.floor(total / 60);
@@ -40,67 +44,95 @@ export default function PayQuotePage() {
     return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
   };
 
-  if (isLoading) return <div className="p-4 text-sm">Loading payment...</div>;
-  if (isError || !quote) return <div className="p-4 text-red-500">Failed to load quote.</div>;
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  if (isError || !quote) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#EBEDF3] p-6">
+        <p className="text-red-500 text-sm">Failed to load quote.</p>
+      </main>
+    );
+  }
+
   if (quote.status === 'EXPIRED') {
     router.push(`/payin/${uuid}/expired`);
     return null;
   }
 
+  const amount = `${quote.paidCurrency.amount.toFixed(8)} ${quote.paidCurrency.currency}`;
+  const address = quote.address?.address || 'N/A';
+  const shortAddress = address.length > 12 ? `${address.slice(0, 10)}...` : address;
+  const qrUri = quote.address?.uri;
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted p-6">
-      <div className="w-full max-w-md rounded-md bg-white p-6 shadow">
-        <h1 className="text-lg font-semibold mb-4">
-          Pay with {quote.paidCurrency.currency}
-        </h1>
-        <p className="text-sm text-muted-foreground mb-4">
-          To complete this payment send the amount due to the BTC address provided below.
-        </p>
+    <main className="min-h-screen bg-[#EBEDF3] flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-white shadow-none border-0">
+        <CardHeader className="text-center">
+          <CardTitle>Pay with {quote.paidCurrency.currency}</CardTitle>
+          <CardDescription className="text-muted-foreground text-sm">
+            To complete this payment, send the amount due to the address provided below.
+          </CardDescription>
+        </CardHeader>
 
-        <div className="text-sm mb-3">
-          <div className="mb-2">
-            <strong>Amount due:</strong>{' '}
-            <span
-              onClick={() => copyToClipboard(quote.paidCurrency.amount.toString())}
-              onKeyDown={(e) => e.key === 'Enter' && copyToClipboard(quote.paidCurrency.amount.toString())}
-              tabIndex={0}
-              role="button"
-              className="cursor-pointer text-primary underline"
-            >
-              {quote.paidCurrency.amount.toFixed(8)} {quote.paidCurrency.currency} (Copy)
-            </span>
+        <CardContent className="space-y-4 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Amount due</span>
+            {isLoading ? (
+              <Skeleton className="h-4 w-24" />
+            ) : (
+              <span className="font-semibold">
+                {amount}{' '}
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(amount)}
+                  className="text-primary underline ml-2"
+                >
+                  Copy
+                </button>
+              </span>
+            )}
           </div>
 
-          <div className="mb-2">
-            <strong>BTC address:</strong>{' '}
-            <span
-              onClick={() => copyToClipboard(quote.address?.address || '')}
-              onKeyDown={(e) => e.key === 'Enter' && copyToClipboard(quote.address?.address || '')}
-              tabIndex={0}
-              role="button"
-              className="cursor-pointer text-primary underline"
-            >
-              {quote.address?.address || 'N/A'} (Copy)
-            </span>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">BTC address</span>
+            {isLoading ? (
+              <Skeleton className="h-4 w-28" />
+            ) : (
+              <span className="font-semibold truncate max-w-[150px]">
+                {shortAddress}{' '}
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(address)}
+                  className="text-primary underline ml-2"
+                >
+                  Copy
+                </button>
+              </span>
+            )}
           </div>
-        </div>
 
-        {quote.address?.uri && (
-          <div className="flex justify-center my-4">
-            <QRCode value={quote.address.uri} size={160} />
-          </div>
-        )}
+          {qrUri ? (
+            <div className="flex flex-col items-center justify-center py-4">
+              <QRCode value={qrUri} size={160} />
+              <p className="text-xs text-muted-foreground mt-2 text-center break-all">{address}</p>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground text-sm">
+              <Skeleton className="h-40 w-40 mx-auto" />
+              <Skeleton className="h-4 w-48 mx-auto mt-2" />
+            </div>
+          )}
 
-        {timeLeft !== null && (
-          <div className="mb-4 text-sm">
-            <strong>Time left to pay:</strong> {formatTime(timeLeft)}
-          </div>
-        )}
-
-        <Button variant="outline" onClick={() => router.push('/')}>
-          Back to Home
-        </Button>
-      </div>
+          {timeLeft !== null && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Time left to pay</span>
+              <span className="font-semibold">{formatTime(timeLeft)}</span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

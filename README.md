@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hosted Payment Page
+
+This is a fully responsive [Next.js](https://nextjs.org/) 15+ project built with the App Router, TypeScript, React 19, [shadcn/ui](https://ui.shadcn.com/), and React Query. It integrates directly with the BVNK sandbox API for generating and processing payment quotes.
+
+---
+
+## 🔧 Features
+
+- Automatic quote generation and redirection
+- Secure Hawk-authenticated API calls
+- 3-step payment flow:
+  - Accept Quote
+  - Pay Quote (with QR code and BTC address)
+  - Expired Page
+- Countdown logic for time-sensitive quotes
+- Fully typed, professional-grade folder structure
+- Styled using Tailwind CSS and ShadCN components
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the Project
+
+```bash
+git clone https://github.com/your-username/hosted-payment-page.git
+cd hosted-payment-page
+```
+
+---
+
+### 2. Install Dependencies
+
+Using **npm**:
+
+```bash
+npm install
+```
+
+Or using **yarn**:
+
+```bash
+yarn install
+```
+
+---
+
+### 3. Setup Environment Variables
+
+Rename `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+Then update the new `.env.local` file with the correct values:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://api.sandbox.bvnk.com/api/v1
+NEXT_PUBLIC_HAWK_AUTH_ID=your_hawk_id_here
+NEXT_PUBLIC_HAWK_AUTH_KEY=your_hawk_key_here
+NEXT_PUBLIC_MERCHANT_ID=your_merchant_id_here
+```
+
+---
+
+### 4. Run the Development Server
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open your browser and go to:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+You’ll be redirected to a generated payment quote flow.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Folder Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```txt
+src/
+├── app/
+│   ├── page.tsx                   # Auto-generates quote and redirects
+│   ├── payin/[uuid]/              # Dynamic routes for each quote
+│   │   ├── page.tsx               # Accept Quote Page
+│   │   ├── pay.tsx                # Pay Quote Page
+│   │   └── expired.tsx            # Expired Quote Page
+├── components/                    # UI components (buttons, cards, selects)
+├── config/                        # env.ts + react-query setup
+├── hooks/                         # React Query custom hooks
+├── lib/                           # Hawk header + API setup
+├── types/                         # Strong TypeScript typings
+└── utils/                         # Utility functions like random ID generation
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Next.js 15+** with App Router
+- **TypeScript**
+- **React 19**
+- **React Query**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **Axios**
+- **QRCode Generator**

@@ -1,21 +1,32 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+
+import ErrorIcon from '@/assets/error-icon.svg';
 
 export default function ExpiredPage() {
-  const router = useRouter();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted p-6">
-      <div className="w-full max-w-md rounded-md bg-white p-6 text-center shadow">
-        <h1 className="text-xl font-semibold mb-2 text-red-600">Quote Expired</h1>
-        <p className="text-sm text-muted-foreground mb-6">
-          Unfortunately, this payment quote has expired. You can generate a new one to try again.
-        </p>
+    <main className="min-h-screen flex items-center justify-center bg-[#EBEDF3] p-6">
+      <Card className="w-full max-w-md bg-white shadow-none text-center border-0">
+        <CardHeader className="flex flex-col items-center">
+          <Image src={ErrorIcon} alt="Expired Icon" width={60} height={60} />
+        </CardHeader>
 
-        <Button onClick={() => router.push('/')}>Back to Home</Button>
-      </div>
+        <CardContent>
+          <CardTitle className="text-lg text-[#0A1628]-600 mb-1">Payment details expired</CardTitle>
+          <CardDescription className="text-muted-foreground text-sm">
+            The payment details for your transaction have expired.
+          </CardDescription>
+        </CardContent>
+      </Card>
     </main>
   );
 }

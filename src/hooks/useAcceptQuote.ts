@@ -9,9 +9,10 @@ export const useAcceptQuote = (uuid: string) => {
   return useMutation<QuoteSummary, Error, AcceptQuotePayload>({
     mutationFn: (payload) => acceptQuote(uuid, payload),
     onSuccess: (data) => {
+      console.log('AcceptQuote success response:', data);
       if (data.status === 'PENDING' && data.quoteStatus === 'ACCEPTED') {
         router.push(`/payin/${uuid}/pay`);
       }
-    },
+    }
   });
 };

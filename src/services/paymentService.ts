@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { QuoteSummary, UpdateQuotePayload, AcceptQuotePayload } from '@/types/payment';
+import { ENV } from '@/config/env';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = ENV.API_BASE_URL;
 
-console.log('BASE_URL:', process.env.NEXT_PUBLIC_API_BASE_URL);
+console.log('BASE_URL:', ENV.API_BASE_URL);
 
 
 export const getQuoteSummary = async (uuid: string): Promise<QuoteSummary> => {
