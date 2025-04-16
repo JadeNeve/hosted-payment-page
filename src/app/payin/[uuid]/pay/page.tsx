@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useGetQuote } from '@/hooks/useGetQuote';
-import { useEffect, useState } from 'react';
+import { useCountdown } from '@/hooks/useCountDown';
 import QRCode from 'react-qr-code';
 import {
   Card,
@@ -13,13 +13,6 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const formatTime = (ms: number) => {
-  const total = Math.floor(ms / 1000);
-  const min = Math.floor(total / 60);
-  const sec = total % 60;
-  return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-};
-
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text);
 };
@@ -27,33 +20,15 @@ const copyToClipboard = (text: string) => {
 export default function PayQuotePage() {
   const { uuid } = useParams() as { uuid: string };
   const router = useRouter();
-
   const { data: quote, isLoading, isError } = useGetQuote(uuid);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (!quote?.expiryDate) return;
+  const countdown = useCountdown(quote?.expiryDate, () => {
+    router.push(`/payin/${uuid}/expired`);
+  });
 
-    const expiry = quote.expiryDate;
-    const timer = setInterval(() => {
-      const diff = expiry - Date.now();
-
-      if (diff <= 0) {
-        clearInterval(timer);
-        router.push(`/payin/${uuid}/expired`);
-      } else {
-        setTimeLeft(diff);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [quote?.expiryDate, router, uuid]);
-
-  useEffect(() => {
-    if (quote?.status === 'EXPIRED') {
-      router.push(`/payin/${uuid}/expired`);
-    }
-  }, [quote?.status, router, uuid]);
+  if (quote?.status === 'EXPIRED') {
+    router.push(`/payin/${uuid}/expired`);
+  }
 
   if (isError) {
     return (
@@ -136,10 +111,10 @@ export default function PayQuotePage() {
             </div>
           )}
 
-          {timeLeft !== null && (
+          {countdown !== null && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Time left to pay</span>
-              <span className="font-semibold">{formatTime(timeLeft)}</span>
+              <span className="font-semibold">{countdown}</span>
             </div>
           )}
         </CardContent>
