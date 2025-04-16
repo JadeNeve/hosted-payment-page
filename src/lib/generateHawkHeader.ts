@@ -1,4 +1,3 @@
-// src/lib/generateHawkHeader.ts
 import hawk from 'hawk';
 import { Credentials } from 'hawk/lib/client';
 import { ENV } from '@/config/env';
