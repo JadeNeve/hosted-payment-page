@@ -13,6 +13,17 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const formatTime = (ms: number) => {
+  const total = Math.floor(ms / 1000);
+  const min = Math.floor(total / 60);
+  const sec = total % 60;
+  return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+};
+
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text);
+};
+
 export default function PayQuotePage() {
   const { uuid } = useParams() as { uuid: string };
   const router = useRouter();
@@ -28,6 +39,7 @@ export default function PayQuotePage() {
       const diff = expiry - Date.now();
 
       if (diff <= 0) {
+        clearInterval(timer);
         router.push(`/payin/${uuid}/expired`);
       } else {
         setTimeLeft(diff);
@@ -37,18 +49,13 @@ export default function PayQuotePage() {
     return () => clearInterval(timer);
   }, [quote?.expiryDate, router, uuid]);
 
-  const formatTime = (ms: number) => {
-    const total = Math.floor(ms / 1000);
-    const min = Math.floor(total / 60);
-    const sec = total % 60;
-    return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  };
+  useEffect(() => {
+    if (quote?.status === 'EXPIRED') {
+      router.push(`/payin/${uuid}/expired`);
+    }
+  }, [quote?.status, router, uuid]);
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  if (isError || !quote) {
+  if (isError) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-[#EBEDF3] p-6">
         <p className="text-red-500 text-sm">Failed to load quote.</p>
@@ -56,9 +63,12 @@ export default function PayQuotePage() {
     );
   }
 
-  if (quote.status === 'EXPIRED') {
-    router.push(`/payin/${uuid}/expired`);
-    return null;
+  if (!quote) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#EBEDF3] p-6">
+        <Skeleton className="h-40 w-40" />
+      </main>
+    );
   }
 
   const amount = `${quote.paidCurrency.amount.toFixed(8)} ${quote.paidCurrency.currency}`;
@@ -77,6 +87,7 @@ export default function PayQuotePage() {
         </CardHeader>
 
         <CardContent className="space-y-4 text-sm">
+
           <div className="flex justify-between">
             <span className="text-muted-foreground">Amount due</span>
             {isLoading ? (

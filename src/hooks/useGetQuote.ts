@@ -7,8 +7,5 @@ export const useGetQuote = (uuid: string) => {
     queryKey: ['quote', uuid],
     queryFn: () => getQuoteSummary(uuid),
     enabled: !!uuid,
-    staleTime: 30 * 1000,
-    refetchInterval: 30 * 1000,
-    retry: 1,
   });
 };
