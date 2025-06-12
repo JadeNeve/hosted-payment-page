@@ -68,7 +68,6 @@ const AcceptQuotePage = () => {
   };
 
   const handleConfirm = () => {
-    console.log('working?')
     acceptQuote.mutate(
       {
         uuid: uuid!,
