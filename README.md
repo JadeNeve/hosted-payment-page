@@ -1,54 +1,79 @@
-# React + TypeScript + Vite
+# Hosted Payment Page (HPP) – Technical Assessment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a **Hosted Payment Page (HPP)** built using **React + TypeScript + Vite**, styled with **Radix UI** and designed to match the provided **Figma spec**. It integrates with the **BVNK sandbox API** to simulate a real-world crypto payment flow.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features Implemented
 
-## Expanding the ESLint configuration
+### Accept Quote Page `/payin/:uuid`
+- Fetches quote summary via `GET /pay/:uuid/summary`
+- Displays merchant name, payment amount, and transaction reference
+- Select dropdown (BTC, ETH, LTC) to update the quote
+- Updates quote using `PUT /pay/:uuid/update/summary`
+- Countdown timer using `acceptanceExpiryDate` (30s)
+- Shows amount due, quote expiry, and confirm button after currency selection
+- Confirms quote via `PUT /pay/:uuid/accept/summary` and redirects to Pay Quote
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Pay Quote Page `/payin/:uuid/pay`
+- Fetches confirmed quote via `GET /pay/:uuid/summary`
+- Displays "Pay with Bitcoin" summary
+- Shows:
+  - Amount due (with copy to clipboard)
+  - Address (with copy to clipboard)
+  - QR code
+  - Countdown timer based on `expiryDate`
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Expired Page `/payin/:uuid/expired`
+- Shown when `status: EXPIRED` or the expiry date passes
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Tech Stack
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- React + Vite + TypeScript
+- Radix UI (Primitives and Layout)
+- Custom components: `Container`, `SelectCurrency`, `InfoRowCard`, etc.
+- React Query for all API integration
+- Custom Countdown Timer Hook
+- Clipboard copy functionality
+- Routing via React Router
+
+---
+
+## API Integration
+
+### Postman
+Use the provided `payments.postman_collection.json` and `sandbox.postman_environment.json` files to:
+- Create new quotes
+- Simulate quote updates
+- Accept quotes
+
+> Quotes must be regenerated if expired or already accepted.
+
+---
+
+## Setup Instructions
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/JadeNeve/hosted-payment-page.git
+
+# 2. Navigate into the project
+cd hosted-payment-page
+
+# 3. Install dependencies
+yarn install
+
+# 4. Rename the environment file
+mv .env.example .env.local
+
+# 5. Add your credentials to `.env.local`
+VITE_APP_API_URL=https://api.sandbox.bvnk.com/api/v1
+VITE_APP_HAWK_ID=your-hawk-id
+VITE_APP_HAWK_KEY=your-hawk-key
+VITE_APP_MERCHANT_ID=your-merchant-id
+
+# 6. Run the dev server
+yarn dev
+
