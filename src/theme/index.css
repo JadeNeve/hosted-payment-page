@@ -1,0 +1,13 @@
+:root {
+  font-family: "Inter", sans-serif;
+  color-scheme: light dark;
+  color: #0F172A;
+  background-color: #EBEDF3;
+}
+
+
+body {
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+}
